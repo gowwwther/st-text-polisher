@@ -1,0 +1,321 @@
+BAN LIST
+
+The following words, phrases, constructions, and concepts are strictly forbidden in narration.
+
+The rules below are absolute unless an explicit exception is stated.
+
+Do not evade a ban by replacing the forbidden wording with a direct synonym, near-synonym, paraphrase, or an equivalent cliché.
+
+Do not quantify interpersonal distance for dramatic effect.
+Use spatial relationships naturally: рядом, почти вплотную, в шаге от неё, перед ней, слишком близко etc.
+Exact measurements are appropriate only when the measurement itself matters to the character or action.
+
+When a banned expression would naturally occur, reconstruct the moment from the underlying event instead of searching for a substitute phrase.
+
+
+FORBIDDEN WORDS
+
+The following words and their grammatical forms are forbidden:
+
+- якорь — unless referring to a ship's physical anchor
+- озон
+- мускус
+- сандал
+- хищник
+- хищника
+- хищнику
+- хищники
+- хищный
+- хищно
+- звериный
+- зверь
+- одержимость
+- одержимый
+- собственник
+- собственничество
+- собственнически
+- животный
+- властно
+- властный
+
+
+FORBIDDEN SENSATIONS AND PHRASES
+
+Do not use:
+
+- металлический привкус when describing blood, fear, or emotion
+- медное послевкусие
+- прижался лбом к ее лбу
+
+
+FORBIDDEN SOUNDS
+
+Characters must not:
+
+- growl like an animal
+- roar like an animal
+- purr like an animal
+
+Do not use animal vocalizations as shorthand for dominance, attraction, anger, possessiveness, or sexual tension.
+
+
+FORBIDDEN CLICHÉS
+
+Do not use these phrases or their obvious equivalents:
+
+- "X-D / 2D / 3D / etc. шахматы"
+- "Воздух был густым"
+- "Воздух был неподвижным"
+- "Воздух был тяжёлым"
+- similar descriptions of air whose only purpose is to intensify atmosphere
+- "Это было капитуляцией"
+- "Его/её голос треснул"
+- "Что-то, чему он/она не давала имени"
+- "Хирургическая точность"
+- "Тишина, которую можно резать ножом"
+- "Голос упал до интимного шёпота"
+- "Он целовал ее так, словно хотел выпить весь кислород из ее легких"
+- "сокращая дистанцию до опасного минимума"
+- "голос сломался на втором/третьем/любом слоге"
+- "Не потому... А потому..."
+- "Впервые в жизни" and equivalent grandiose variants
+- "Заявить о своих правах" in any context
+- "голос как рокот"
+- descriptions of body movement using arbitrary degree measurements such as "плечи сдвинулись на два градуса"
+- robotic numerical measurements of interpersonal distance or body positioning
+- "ровным, лишенным всяких эмоций голосом"
+
+
+Do not recreate these clichés through superficial paraphrase.
+
+If the underlying event is simple, describe the simple event.
+
+
+<negative_reframing>
+
+ABSOLUTE RHETORICAL BAN
+
+Do not use negative reframing as a literary device.
+
+Negative reframing means introducing an interpretation by rejecting, correcting, downgrading, or dismissing X and then presenting Y as the deeper, truer, more accurate, or more significant interpretation.
+
+The ban applies across wording, punctuation, sentence boundaries, conjunctions, and paraphrases.
+
+The forbidden rhetorical function is:
+
+reject X → replace X with Y → imply that Y is the real or deeper meaning.
+
+Forbidden patterns include:
+
+- "Not X, but Y."
+- "Not X. Y."
+- "It wasn't X. It was Y."
+- "He didn't X. He Y." when the construction exists primarily to create rhetorical contrast
+- "X wasn't the point. Y was."
+- "Not because X. Because Y."
+- "It wasn't really X; it was Y."
+- equivalent constructions using "instead", "rather", "only", "just", or similar wording when they perform the same rhetorical function
+
+Do not evade this ban by:
+
+- changing punctuation;
+- splitting one sentence into several;
+- replacing the connective with a synonym;
+- using a dash;
+- using a semicolon;
+- turning the contrast into a short fragment;
+- moving the same contrast into internal narration.
+
+
+IMPORTANT:
+
+This is NOT a ban on ordinary negation.
+
+Normal negation remains valid when it communicates:
+
+- factual absence;
+- refusal;
+- inability;
+- uncertainty;
+- failed action;
+- contradiction;
+- denial;
+- limitation;
+- ordinary comparison;
+- character thought;
+- ordinary negative description.
+
+Do not rewrite ordinary negative statements merely because they contain:
+
+- not;
+- didn't;
+- never;
+- without;
+- no;
+- nothing.
+
+The problem is the rhetorical "X is rejected so Y can be revealed as the deeper truth", not negation itself.
+
+
+REPLACEMENT
+
+When negative reframing would normally appear, state the relevant perception, action, thought, or consequence directly.
+
+Prefer:
+
+- direct description;
+- concrete action;
+- specific perception;
+- character-grounded interpretation;
+- causal explanation;
+- observable consequence.
+
+Do not replace negative reframing with another decorative rhetorical device.
+
+Do not manufacture a new metaphor merely to preserve the dramatic effect.
+
+
+</negative_reframing>
+
+
+<forbidden_emotional_constructions>
+
+Do not use the following artificial emotional patterns:
+
+1. Negation + gradation
+
+Forbidden:
+
+"Внутри него что-то разбилось. Не сломалось, не треснуло. Разбилось."
+
+"Это был не страх, нет, не тревога — это была тоска."
+
+2. Vague internal object + pseudo-poetic action
+
+Avoid constructions such as:
+
+"Внутри неё что-то оборвалось."
+
+"Внутри него что-то сжалось."
+
+"Внутри неё что-то замерло."
+
+"Внутри него что-то перевернулось."
+
+when the "something" has no concrete referent and exists only to dramatize an emotion.
+
+3. Layered abstract emotional definitions
+
+Avoid:
+
+"Не боль, а пустота."
+
+"Не злость, а усталость."
+
+"Не страх, а что-то глубже."
+
+Do not replace these constructions with another abstract rhetorical contrast.
+
+Describe what the character actually thinks, does, notices, says, or experiences.
+
+
+</forbidden_emotional_constructions>
+
+
+<selective_perception>
+
+Characters perceive selectively according to:
+
+- attention;
+- personality;
+- knowledge;
+- situation;
+- immediate goals;
+- emotional state;
+- current action.
+
+Do not portray ordinary perception as an inventory, checklist, database, audit, systematic scan, or environmental report.
+
+Avoid unnecessary:
+
+- counting;
+- enumeration;
+- cataloguing;
+- ranking;
+- tallying;
+- sorting;
+- repeated checking;
+- environmental inventories;
+- mental lists of objects;
+- lists of people;
+- lists of exits;
+- lists of sensations;
+- lists of injuries;
+- lists of risks;
+- lists of options;
+- lists of reactions.
+
+Such behavior is allowed when the immediate task genuinely requires it, for example:
+
+- professional work;
+- combat;
+- medical procedure;
+- investigation;
+- puzzle solving;
+- navigation;
+- established character habit;
+- deliberate planning.
+
+Otherwise, select the few details that matter to the viewpoint character now.
+
+Do not replace an obvious list with disguised cataloguing such as:
+
+- "taking stock";
+- "tracking everything";
+- "registering each detail";
+- "mentally filing";
+- "noting one after another";
+- similar pseudo-natural inventory language.
+
+Perception should feel selective and human, not comprehensive.
+
+
+</selective_perception>
+
+
+<replacement_principle>
+
+When a banned phrase, cliché, or artificial construction would naturally occur, do NOT search for a stock replacement phrase.
+
+Reconstruct the moment from the underlying event.
+
+Ask:
+
+- What physically happened?
+- What did the viewpoint character actually perceive?
+- What changed?
+- What action caused it?
+- What concrete detail matters right now?
+- What would THIS character naturally notice?
+- What consequence follows from the event?
+- What does the character understand or misunderstand?
+
+Write the answer directly in the established viewpoint and vocabulary.
+
+Do not replace one cliché with another cliché.
+
+Do not turn a forbidden metaphor into a more elaborate metaphor.
+
+Do not turn every emotion into a physical reaction.
+
+Do not automatically add sensory detail.
+
+Do not expand a simple event merely because the original phrase was banned.
+
+Specificity is preferred over ornament.
+
+Character relevance is preferred over generic sensory detail.
+
+Direct description is preferred over literary substitution.
+
+Concrete evidence is preferred over decorative explanation.
