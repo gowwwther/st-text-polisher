@@ -1,0 +1,13 @@
+{
+  "display_name": "Text Polisher · Редактор ответов",
+  "loading_order": 100,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "Тилл",
+  "version": "1.0.0",
+  "minimum_client_version": "1.13.0",
+  "auto_update": false,
+  "homePage": "https://github.com/gowwwther/st-text-polisher"
+}
