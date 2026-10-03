@@ -1,0 +1,22 @@
+{
+  "attachments": [
+    {
+      "rule_file": "extended.txt",
+      "source": "Вставленный текст(20261003-091535).txt",
+      "byte_identical": true,
+      "bytes": 39218,
+      "sha256": "bb0d92fee495cf509411dff1acdc8f086076cb3e8444038e575b49de2df4732b"
+    },
+    {
+      "rule_file": "agency.txt",
+      "source": "Вставленный текст (2)(2).txt",
+      "byte_identical": true,
+      "bytes": 11296,
+      "sha256": "af221735c4dc852c50532d2583472d2a59e0421927f7307b3db3ad544580f221"
+    }
+  ],
+  "basic": {
+    "source": "Full BAN LIST supplied in the conversation",
+    "sha256": "ac43f1c4709f3f6669a5d65191b744cf0563bff4f6ab8d6f691b39edf39eff70"
+  }
+}
