@@ -1,8 +1,9 @@
 import {
-    MODULE, DEFAULTS, normalizeBaseUrl, validateConfig, buildMessages, makeProxyBody,
+    MODULE, DEFAULTS, normalizeBaseUrl, validateConfig, buildMessages, buildReviewMessages, makeProxyBody,
     parseCompletion, captureTarget, assertTarget, replaceText, restoreText, collectEvidence,
 } from './core.js';
 import { requestProxy } from './transport.js';
+import { auditCandidate, issueSummary } from './audit.js';
 
 const ctx = () => SillyTavern.getContext();
 let settings, panel, rules, epoch = 0, generationActive = false, job = null, pending = null;
@@ -37,6 +38,7 @@ function field(parent, labelText, key, type = 'text', options = {}) {
         settings[key] = type === 'checkbox' ? input.checked : type === 'number' ? Number(input.value) : input.value;
         ctx().saveSettingsDebounced();
         if (key === 'enabled' && !input.checked) cancelWork('Автоматическая редактура выключена.');
+        if (key === 'review' && !input.checked) cancelWork('Второй проход отключён. Текущая редактура отменена.');
     });
     parent.append(label);
     return input;
@@ -58,7 +60,7 @@ function createPanel() {
     field(body, 'Автоматически редактировать новые ответы ИИ', 'enabled', 'checkbox');
     field(body, 'Предпросмотр перед заменой', 'preview', 'checkbox');
     const modeHint = document.createElement('p'); modeHint.className = 'tp-hint';
-    modeHint.textContent = 'Без галочки предпросмотра результат сразу заменит ответ. Оригинал можно вернуть. Каждая редактура — отдельный API-запрос.';
+    modeHint.textContent = 'Без галочки предпросмотра готовый результат заменит ответ. Оригинал можно вернуть. С включённым вторым проходом редактура использует два API-запроса.';
     body.append(modeHint);
 
     const connection = group(body, 'Подключение API'); connection.open = true;
@@ -100,6 +102,11 @@ function createPanel() {
     field(ruleOptions, 'Расширенные запреты B1–B10 / S1–S10 (строже основного списка)', 'extended', 'checkbox');
     field(ruleOptions, 'Инициатива персонажа / убрать передачу хода', 'agency', 'checkbox');
     field(ruleOptions, 'Проверять эпитеты: одно точное определение, без цепочек', 'epithets', 'checkbox');
+    field(ruleOptions, 'Второй проход: полный аудит банов, верность оригиналу и плавность (ещё один API-запрос)', 'review', 'checkbox');
+    field(ruleOptions, 'Блокировать замену при явных банах и повреждении структуры', 'strictChecks', 'checkbox');
+    const strictHint = document.createElement('p'); strictHint.className = 'tp-hint';
+    strictHint.textContent = 'Второй проход сравнивает правку с оригиналом и сохраняет живой голос. Локальная проверка ловит часть явных форм из расширенного списка и повреждение тегов/rs_metrics. Смысловые клише проверяет модель; абсолютной гарантии нет.';
+    ruleOptions.append(strictHint);
     field(ruleOptions, 'Дополнительные пожелания редактору', 'customRules', 'textarea', { rows: '6', placeholder: 'Например: сохранять длинные реплики; не менять обращения.' });
     ruleOptions.append(button('Открыть активные правила', showRules));
 
@@ -203,7 +210,7 @@ async function edit(id, automatic, captured = null) {
     const streamView = panel.querySelector('[data-stream-view]');
     const streamText = panel.querySelector('[data-stream-text]');
     streamView.hidden = !config.stream; streamText.value = '';
-    let lastProgress = 0;
+    let lastProgress = 0, pass = 1;
     const progress = ({ text }) => {
         if (job !== active || active.controller.signal.aborted) return;
         const now = Date.now();
@@ -212,7 +219,8 @@ async function edit(id, automatic, captured = null) {
         const follow = streamText.scrollTop + streamText.clientHeight >= streamText.scrollHeight - 30;
         streamText.value = text;
         if (follow) streamText.scrollTop = streamText.scrollHeight;
-        say(text ? `Получаю редактуру ответа №${id + 1}: ${text.length} символов…` : `Модель обрабатывает ответ №${id + 1}; поток активен…`);
+        const stage = config.review ? `Проход ${pass}/2. ` : '';
+        say(stage + (text ? `Получаю редактуру ответа №${id + 1}: ${text.length} символов…` : `Модель обрабатывает ответ №${id + 1}; поток активен…`));
     };
     say(`Редактирую ответ №${id + 1}…`);
     try {
@@ -221,11 +229,26 @@ async function edit(id, automatic, captured = null) {
         const messages = buildMessages(config, loaded, target.original, evidence);
         const data = await apiRequest('generate', makeProxyBody(config, requestKey, messages), active.controller, config.timeout, progress);
         if (job !== active || active.controller.signal.aborted) return;
-        const result = parseCompletion(data);
+        let result = parseCompletion(data);
+        if (config.review) {
+            assertTarget(ctx(), target, epoch);
+            pass = 2;
+            say(`Второй проход ответа №${id + 1}: баны, верность оригиналу и плавность…`);
+            streamText.value = ''; lastProgress = 0;
+            const reviewed = await apiRequest('generate', makeProxyBody(config, requestKey,
+                buildReviewMessages(config, loaded, target.original, result, evidence)), active.controller, config.timeout, progress);
+            if (job !== active || active.controller.signal.aborted) return;
+            result = parseCompletion(reviewed);
+        }
         if (config.stream) streamText.value = result;
         assertTarget(ctx(), target, epoch);
+        const issues = config.strictChecks ? auditCandidate(target.original, result, config, loaded) : [];
+        if (issues.length) {
+            showPreview(target, result, config.model, config, loaded, issues);
+            return;
+        }
         if (result === target.original) { say('Редактор оставил ответ без изменений.'); return; }
-        if (config.preview) showPreview(target, result, config.model);
+        if (config.preview) showPreview(target, result, config.model, config, loaded);
         else await apply(target, result, config.model);
     } catch (error) {
         if (job === active) { streamText.value = ''; streamView.hidden = true; }
@@ -239,7 +262,7 @@ function openDialog(title, className = '') {
     document.body.append(dialog); return dialog;
 }
 
-function showPreview(target, result, model) {
+function showPreview(target, result, model, config, loaded, initialIssues = []) {
     const dialog = openDialog(`Редактура ответа №${target.id + 1}`, 'tp-preview');
     const columns = document.createElement('div'); columns.className = 'tp-columns';
     const makeColumn = (title, text, readOnly) => {
@@ -251,17 +274,22 @@ function showPreview(target, result, model) {
     const edited = makeColumn('После редактуры — можно поправить вручную', result, false);
     dialog.append(columns);
     const error = document.createElement('p'); error.setAttribute('role', 'status'); dialog.append(error);
+    error.textContent = initialIssues.length ? 'Автозамена заблокирована. ' + issueSummary(initialIssues) : '';
     const actions = document.createElement('div'); actions.className = 'tp-actions';
     const accept = button('Заменить ответ', async () => {
         accept.disabled = true;
-        try { await apply(target, edited.value, model); dialog.close(); }
+        try {
+            const issues = config.strictChecks ? auditCandidate(target.original, edited.value, config, loaded) : [];
+            if (issues.length) throw new Error('Исправь замечания перед заменой. ' + issueSummary(issues));
+            await apply(target, edited.value, model); dialog.close();
+        }
         catch (e) { error.textContent = e.message; notifyError(e); }
         finally { accept.disabled = false; }
     });
     actions.append(accept, button('Оставить исходник', () => dialog.close())); dialog.append(actions);
     pending = { dialog, target };
     dialog.addEventListener('close', () => { if (pending?.dialog === dialog) pending = null; dialog.remove(); drainQueue(); });
-    dialog.showModal(); say('Предпросмотр готов. Можно исправить текст перед применением.');
+    dialog.showModal(); say(initialIssues.length ? 'Проверка нашла нарушения. Исходник сохранён; исправь текст в предпросмотре.' : 'Предпросмотр готов. Можно исправить текст перед применением.');
 }
 
 async function showRules() {
