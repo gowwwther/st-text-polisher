@@ -2,6 +2,7 @@ import {
     MODULE, DEFAULTS, normalizeBaseUrl, validateConfig, buildMessages, makeProxyBody,
     parseCompletion, captureTarget, assertTarget, replaceText, restoreText, collectEvidence,
 } from './core.js';
+import { requestProxy } from './transport.js';
 
 const ctx = () => SillyTavern.getContext();
 let settings, panel, rules, epoch = 0, generationActive = false, job = null, pending = null;
@@ -89,6 +90,10 @@ function createPanel() {
     field(connection, 'ID модели (из каталога либо вручную)', 'model', 'text', { list: 'tp-models', spellcheck: 'false' });
     const list = document.createElement('datalist'); list.id = 'tp-models'; list.dataset.modelList = ''; connection.append(list);
     connection.append(button('Загрузить модели / проверить ключ', loadModels));
+    field(connection, 'Стриминг ответа редактора', 'stream', 'checkbox');
+    const streamHint = document.createElement('p'); streamHint.className = 'tp-hint';
+    streamHint.textContent = 'Текст поступает частями в поток ниже. В стриминге таймаут отсчитывается между порциями данных. Замена ответа и предпросмотр доступны после полного завершения.';
+    connection.append(streamHint);
 
     const ruleOptions = group(body, 'Правила редактора');
     field(ruleOptions, 'Основной BAN LIST', 'basic', 'checkbox');
@@ -104,7 +109,7 @@ function createPanel() {
     field(advanced, 'Предыдущих сообщений в контексте', 'contextMessages', 'number', { min: '0', max: '30', step: '1' });
     field(advanced, 'Температура', 'temperature', 'number', { min: '0', max: '2', step: '0.05' });
     field(advanced, 'Лимит выходных токенов редактора', 'maxTokens', 'number', { min: '256', max: '65536', step: '256' });
-    field(advanced, 'Таймаут, секунд', 'timeout', 'number', { min: '10', max: '600', step: '10' });
+    field(advanced, 'Таймаут ожидания / паузы стрима, секунд', 'timeout', 'number', { min: '10', max: '600', step: '10' });
     const evidenceHint = document.createElement('p'); evidenceHint.className = 'tp-hint';
     evidenceHint.textContent = 'В API отправляются ответ, активные правила и выбранные данные контекста. По умолчанию — 5 предыдущих сообщений для проверки поз и движений; редактируется только текущий ответ. Lorebook и скрытые рассуждения не отправляются.';
     advanced.append(evidenceHint);
@@ -114,6 +119,11 @@ function createPanel() {
     body.append(actions);
     const status = document.createElement('p'); status.dataset.status = ''; status.className = 'tp-status'; status.setAttribute('role', 'status');
     status.textContent = 'Введи ключ, выбери модель и начни с ручной редактуры.'; body.append(status);
+    const streamView = group(body, 'Поток редактора — промежуточный текст');
+    streamView.dataset.streamView = ''; streamView.hidden = true; streamView.open = true;
+    const streamText = document.createElement('textarea'); streamText.className = 'text_pole tp-stream-text';
+    streamText.dataset.streamText = ''; streamText.readOnly = true; streamText.spellcheck = false;
+    streamText.setAttribute('aria-label', 'Промежуточный текст редактора'); streamView.append(streamText);
     (document.querySelector('#extensions_settings2') ?? document.querySelector('#extensions_settings')).append(panel);
 }
 
@@ -134,20 +144,8 @@ async function getRules() {
     rules = Object.fromEntries(values); return rules;
 }
 
-async function apiRequest(path, body, controller, timeout) {
-    const timer = setTimeout(() => controller.abort('timeout'), timeout * 1000);
-    try {
-        const response = await fetch(`/api/backends/chat-completions/${path}`, {
-            method: 'POST', headers: ctx().getRequestHeaders(), body: JSON.stringify(body), signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(`Ошибка API/сервера (${response.status}). Проверь ключ, URL, модель и баланс.`);
-        const data = await response.json();
-        if (data?.error) throw new Error('Провайдер вернул ошибку. Проверь ключ, модель, баланс и журнал SillyTavern.');
-        return data;
-    } catch (error) {
-        if (controller.signal.aborted) throw new Error(controller.signal.reason === 'timeout' ? 'Редактор не успел ответить. Исходник сохранён.' : 'Запрос отменён.');
-        throw error;
-    } finally { clearTimeout(timer); }
+async function apiRequest(path, body, controller, timeout, onProgress) {
+    return requestProxy(path, body, controller, timeout, ctx().getRequestHeaders(), onProgress);
 }
 
 async function loadModels() {
@@ -202,19 +200,35 @@ async function edit(id, automatic, captured = null) {
     assertTarget(ctx(), target, epoch);
     const evidence = collectEvidence(ctx(), target, config);
     const active = { target, controller: new AbortController() }; job = active;
+    const streamView = panel.querySelector('[data-stream-view]');
+    const streamText = panel.querySelector('[data-stream-text]');
+    streamView.hidden = !config.stream; streamText.value = '';
+    let lastProgress = 0;
+    const progress = ({ text }) => {
+        if (job !== active || active.controller.signal.aborted) return;
+        const now = Date.now();
+        if (now - lastProgress < 100) return;
+        lastProgress = now;
+        const follow = streamText.scrollTop + streamText.clientHeight >= streamText.scrollHeight - 30;
+        streamText.value = text;
+        if (follow) streamText.scrollTop = streamText.scrollHeight;
+        say(text ? `Получаю редактуру ответа №${id + 1}: ${text.length} символов…` : `Модель обрабатывает ответ №${id + 1}; поток активен…`);
+    };
     say(`Редактирую ответ №${id + 1}…`);
     try {
         const loaded = await getRules();
         if (job !== active || active.controller.signal.aborted) return;
         const messages = buildMessages(config, loaded, target.original, evidence);
-        const data = await apiRequest('generate', makeProxyBody(config, requestKey, messages), active.controller, config.timeout);
+        const data = await apiRequest('generate', makeProxyBody(config, requestKey, messages), active.controller, config.timeout, progress);
         if (job !== active || active.controller.signal.aborted) return;
         const result = parseCompletion(data);
+        if (config.stream) streamText.value = result;
         assertTarget(ctx(), target, epoch);
         if (result === target.original) { say('Редактор оставил ответ без изменений.'); return; }
         if (config.preview) showPreview(target, result, config.model);
         else await apply(target, result, config.model);
     } catch (error) {
+        if (job === active) { streamText.value = ''; streamView.hidden = true; }
         if (job === active) notifyError(error);
     } finally { if (job === active) job = null; drainQueue(); }
 }
@@ -268,6 +282,10 @@ async function restore(id) {
 
 function cancelWork(message, keepQueue = false) {
     job?.controller.abort('cancel'); job = null;
+    const streamText = panel?.querySelector('[data-stream-text]');
+    if (streamText) streamText.value = '';
+    const streamView = panel?.querySelector('[data-stream-view]');
+    if (streamView) streamView.hidden = true;
     pending?.dialog.close(); pending = null;
     if (!keepQueue) automaticQueue.clear();
     clearTimeout(flushTimer);

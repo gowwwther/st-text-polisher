@@ -17,6 +17,7 @@
 .tp-columns label { display: flex; flex-direction: column; gap: 8px; }
 .tp-columns textarea { resize: vertical; height: 55dvh; min-height: 160px; width: 100%; padding: 12px; box-sizing: border-box; line-height: 1.6; font: inherit; }
 .tp-rule-view { width: 100%; height: 65dvh; box-sizing: border-box; }
+.tp-stream-text { height: 180px; resize: vertical; font: inherit; line-height: 1.5; }
 .tp-message-actions { display: inline-flex; gap: 4px; margin-left: 5px; }
 .tp-message-actions .tp-button { font-size: 14px; padding: 2px 7px; min-width: 24px; }
 @media (max-width: 700px) { .tp-columns { grid-template-columns: 1fr; } .tp-columns textarea { height: 27dvh; } .tp-dialog { padding: 12px; } }

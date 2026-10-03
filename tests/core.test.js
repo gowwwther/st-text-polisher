@@ -35,7 +35,8 @@ test('proxy request has independent authorization and does not mutate settings',
     const body = makeProxyBody(settings, ' fake-key ', [{ role: 'user', content: 'text' }]);
     assert.equal(JSON.parse(body.custom_include_headers).Authorization, 'Bearer fake-key');
     assert.equal(body.chat_completion_source, 'custom');
-    assert.equal(body.stream, false);
+    assert.equal(body.stream, true);
+    assert.equal(makeProxyBody({ ...settings, stream: false }, 'key', []).stream, false);
     assert.deepEqual(settings, before);
     assert.equal(JSON.stringify(settings).includes('fake-key'), false);
 });

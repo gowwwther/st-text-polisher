@@ -6,7 +6,7 @@
   "js": "index.js",
   "css": "style.css",
   "author": "Тилл",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "minimum_client_version": "1.13.0",
   "auto_update": false,
   "homePage": "https://github.com/gowwwther/st-text-polisher"
